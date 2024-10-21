@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Watermark Date and Time on Photo</title>
+  <style>
+    canvas {
+      max-width: 100%;
+      border: 1px solid black;
+    }
+  </style>
+</head>
+<body>
+  <h1>Watermark Date and Time on Photo</h1>
+  <input type="file" id="upload" accept="image/*">
+  <br>
+  <canvas id="canvas"></canvas>
+  <br>
+  <button id="download">Download Image with Watermark</button>
+
+  <script>
+    const upload = document.getElementById('upload');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const downloadButton = document.getElementById('download');
+
+    upload.addEventListener('change', handleImageUpload);
+
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          addWatermark();
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function addWatermark() {
+  const date = new Date();
+  const options = { hour: '2-digit', minute: '2-digit' };
+  let timeString = date.toLocaleTimeString([], options);
+
+  // Ganti pemisah dengan titik dua (:)
+  timeString = timeString.replace(/[.]/g, ':');
+
+  const dateString = date.toLocaleDateString() + ' ' + timeString;
+
+  ctx.font = '100px Arial';
+  ctx.fillStyle = 'white';
+  ctx.strokeStyle = 'black';
+  ctx.lineWidth = 2;
+  const textWidth = ctx.measureText(dateString).width;
+  
+  // Posisi watermark di tengah gambar (horizontal & vertikal)
+  const x = (canvas.width - textWidth) / 2;  // Tengah horizontal
+  const y = canvas.height - 30;  // Tengah vertikal
+
+  // Add text shadow (stroke)
+  ctx.strokeText(dateString, x, y);
+  // Add actual text (fill)
+  ctx.fillText(dateString, x, y);
+}
+
+    downloadButton.addEventListener('click', function() {
+      const link = document.createElement('a');
+      link.download = 'watermarked-image.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    });
+  </script>
+</body>
+</html>

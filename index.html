@@ -4,24 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Watermark by Alif rahman</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css" integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@latest/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
     <style>
-        canvas {
-            max-width: 100%;
-            border: 1px solid #00000071;
-            border-radius: .5rem;
+      *{
+        color: #353535;
+        transition: all .30s;
+      }
+      :root{
+        --primary-color: #120710;
+        --secondary-color: #363859;
+        --text-color: #ababab;
+      }
+      
+      .dark{
+        background-color: var(--primary-color);
+        select{
+          background-color: var(--primary-color);
+          border-color: var(--secondary-color);
+          color: var(--text-color);
         }
+        nav{
+          background: none;
+          border-color: var(--secondary-color);
+          i{
+            color: var(--text-color);
+          }
+          span{
+            color: var(--text-color);
+            sup{
+              color: #c0c0c0;
+            }
+          }
+        }
+      label{
+        color: var(--text-color);
+      }
+       #upload, #canvas{
+         border-color: var(--secondary-color);
+         color: var(--text-color);
+       } 
+      }
     </style>
 </head>
-<body class="bg-gray-100">
-    <div class="container mx-auto p-5">
-        <h1 class="text-center text-2xl font-bold mb-6">Watermark 
-        <span class="block ml-20 text-red-400 text-sm"><sup>By</sup>Alif</span></h1>
-
-        <div class="mb-4">
-            <label for="timeOptions" class="block mb-1 font-semibold">Pilih Waktu:</label>
-            <select class="border rounded p-2 w-full" id="timeOptions">
+<body class="bg-stone-100">
+  <nav class="flex bg-white z-30 top-0 fixed w-full justify-between py-7 px-5 border-b shadow">
+    <span class="text-2xl relative font-semibold">
+      WatermarkApp
+      <sup class="absolute left-1 top-6 text-sm font-normal text-red-500">By Alif</sup>
+    </span>
+    <div class="gap-5 flex">
+      <button><i class="fas fa-user text-lg"></i></button>
+      <button id="mode" class="w-8"><i class="fas fa-sun text-lg p-0"></i></button>
+    </div>
+  </nav>
+    <div class="container mx-auto p-5 flex justify-between mt-24">
+        <div>
+            <select class="appearance-none p-2 w-full shadow text-black border bg-white text-center rounded-md" id="timeOptions">
+                <option value="">Pilih waktu</option>
                 <option value="07:30">Jam Masuk: 07:30</option>
                 <option value="13:30">Jam Masuk: 13:30</option>
                 <option value="11:30">Jam Pulang: 11:30</option>
@@ -35,27 +76,26 @@
             </select>
         </div>
 
-        <div class="mb-4">
-            <label for="positionOptions" class="block mb-1 font-semibold">Posisi Watermark:</label>
-            <select class="border rounded p-2 w-full" id="positionOptions">
+        <div>
+            <select class="appearance-none rounded p-2 w-full border shadow text-slate-500 bg-white text-center px-7 rounded-md" id="positionOptions">
+                <option>Pilih letak watermark</option>
                 <option value="top-left">Kiri Atas</option>
                 <option value="top-right">Kanan Atas</option>
                 <option value="bottom-left">Kiri Bawah</option>
                 <option value="bottom-right">Kanan Bawah</option>
-                <option value="center">Tengah</option>
             </select>
         </div>
-
-        <div class="mb-4">
+    </div>
+     <div class="px-5 mb-28">
             <label for="upload" class="block mb-1 font-semibold">Unggah Gambar:</label>
-            <input type="file" class="border rounded w-full p-2" id="upload" accept="image/*">
-        </div>
+            <input type="file" class="border rounded w-full p-2 shadow" id="upload" accept="image/*">
 
         <div class="text-center mb-4">
-            <canvas id="canvas"></canvas>
+            <canvas id="canvas" class="border shadow w-full rounded mt-5"></canvas>
         </div>
 
-        <button class="bg-blue-500 text-white rounded p-2" id="download">Download</button>
+        <button class="bg-blue-500 fixed bottom-5 block text-white right-5 py-3 px-5 rounded-full shadow hover:bg-blue-700" id="download"><i class="fas fa-download text-white mr-3"></i> Download</button>
+      </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -88,28 +128,27 @@
 
         function addWatermark() {
             const date = new Date();
-            const selectedTime = timeOptions.value;  
+            const selectedTime = timeOptions.value == '' ? date.getHours() + ":" + date.getMinutes() : timeOptions.value;  
             const dateString = date.toLocaleDateString() + ' ' + selectedTime;
 
             const aspectRatio = canvas.width / canvas.height;
-            const maxFontSize = 30;
+            const maxFontSize = 20;
             let fontSize = maxFontSize;
+            let pa = 800
 
-            if (aspectRatio > 1) {
-                fontSize = maxFontSize * canvas.height / 750;
-            } else {
-                fontSize = maxFontSize * canvas.width / 750;
-            }
+            aspectRatio > 1 ? fontSize = maxFontSize * canvas.height / pa : fontSize = maxFontSize * canvas.width / pa
 
             ctx.font = `${fontSize}px 'Inter', sans-serif`;
             ctx.fillStyle = 'rgb(255, 255, 255)'; // Warna putih tanpa transparansi
-            ctx.strokeStyle = 'gray';
-            ctx.lineWidth = 2; 
+            ctx.strokeStyle = '#d7d7d7';
+            ctx.lineWidth = 0; 
 
             const textWidth = ctx.measureText(dateString).width;
             const position = positionOptions.value;
-            const padding = 100; // Jarak 2rem = 32px
+            const padding = canvas.width * 0 + 52
             let x, y;
+            
+            console.log(canvas.width)
 
             switch (position) {
                 case 'top-left':
@@ -128,10 +167,9 @@
                     x = canvas.width - textWidth - padding; 
                     y = canvas.height - padding; 
                     break;
-                case 'center':
+                default:
                     x = (canvas.width - textWidth) / 2; 
                     y = (canvas.height + fontSize / 2) / 2; 
-                    break;
             }
 
             ctx.strokeText(dateString, x, y);
@@ -143,8 +181,10 @@
             const link = document.createElement('a');
             link.download = `Watermark_${fileName}.png`; // Ganti nama file di sini
             link.href = canvas.toDataURL();
-            link.click();
+            link.download == "Watermark_image.png" ? alert("Upload gambar dulu") : link.click()
+            //link.click();
         });
     </script>
+    <script src="app.js"></script>
 </body>
 </html>
